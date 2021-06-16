@@ -12,15 +12,15 @@ import os
 
 # Function netscan declaration - list all available nodes within a user given IP range
 def netscan():
-    # To be done -----
+    # To be done ----
 
 # Function remotebackup declaration - connect to the node, zip f
 def remotebackup():
-    # To be done -----
+    # To be done ----
 
 # Function nodeselection - using netscan's output, display the list of available nodes and launch the backup
 def nodeselection():
-    # To be done -----
+    # To be done ----
 
 # Main program
 # Invoke netscan function
