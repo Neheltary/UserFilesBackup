@@ -124,4 +124,3 @@ netscan()
 
 # Invoke nodeselection fuction
 mainmenu()
-
