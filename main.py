@@ -56,7 +56,7 @@ def netscan():
 
         # Control on the IP: ensure we're not trying to check xxx.xxx.xxx.256 and above
         if last_member == 256:
-            ip_split[2] += 1
+            ip_split[2] = str(int(ip_split[2]) + 1)
             last_member = 0
             ips_to_scan = ip_split[0] + '.' + ip_split[1] + '.' + ip_split[2] + '.'
 
