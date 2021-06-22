@@ -23,9 +23,9 @@ def netscan():
 
     # Initiating the ping command depending on the system from which the script is launched
     if os_platform == "Windows":
-        os_ping = "ping -n 1 "
+        os_ping = "ping -n 1 -w 150 "
     else:
-        os_ping = "ping -c 1 "
+        os_ping = "ping -c 1 -w 150 "
 
     # Lets get those online nodes & store them in the dictionary !
     for loop_control in range(1, 254):
