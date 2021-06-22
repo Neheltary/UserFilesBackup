@@ -11,8 +11,8 @@ import time
 import os
 
 
-# Function netscan declaration - list all available nodes within a user given IP range
-def netscan():
+# Function net_scan declaration - list all available nodes within a user given IP range
+def net_scan():
     # Obtaining the network IP which will be checked
     input_ip = input("Enter the network IP you wish to check: ")
     start_ip = input("Enter the starting digit to check for this network: ")
@@ -29,7 +29,7 @@ def netscan():
         os_ping = "ping -c 1 -w 150 "
 
     # Lets get those online nodes & store them in the dictionary !
-    for last_member in range(start_ip, last_ip):
+    for last_member in range(int(start_ip), int(last_ip)+1):
         # Setting the ping command
         current_ip = ips_to_scan + str(last_member)
         current_check = os_ping + current_ip
@@ -59,17 +59,79 @@ def netscan():
         exit()
 
 
-# Function remotebackup declaration - connect to the node, zip f
-def remotebackup(ip_to_backup):
-    # print("Ici, je dois implémenter la fonction de sauvegarde pour {}".format(ip_to_backup))
-    # Unix node ?
-    # Use tar cmd
-    # Windows node ?
-    # powershell Compress-Archive C:\Users\User\Documents\ C:\Users\User\test.zip
+# Function remote_backup declaration - connect to the node, compress the user's folder and transfer it
+def remote_backup(ip_to_backup):
+    # Variables declaration
+    ssh_user = ""
+    ssh_password = ""
+
+    # Looping on username input and providing an escape
+    while ssh_user == "":
+        ssh_user = input("Enter the SSH login for {} (x to exit): ".format(ip_to_backup))
+        if ssh_user == "x":
+            exit()
+
+    # Looping on password input, providing an escape
+    # For additional security this input should be changed to masked characters
+    while ssh_password == "":
+        ssh_password = input("Enter the password for {} (x to exit): ".format(ssh_user))
+        if ssh_password == "x":
+            exit()
+
+    # SSH's try block using paramiko module
+    try:
+        # Creating a new SSHClient
+        ssh_client = paramiko.SSHClient()
+        # Setting paramiko to allow connection to unknown nodes
+        ssh_client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        # Connecting to the node using the provided credentials
+        ssh_client.connect(hostname=ip_to_backup,
+                           username=ssh_user,
+                           password=ssh_password)
+        # Passing "ver" command on the distant node to check if it's running Windows or another system
+        stdin, stdout, stderr = ssh_client.exec_command("ver")
+        out = stdout.read().decode().strip()
+
+        # Formatting the archive's name
+        archive_name = time.strftime("%Y%m%d") + '-' + ip_to_backup + '-' + ssh_user
+
+        # Target is a Windows node
+        if 'Windows' in out:
+            # Initiating the filepath variable
+            filepath = "C:\\Users\\" + ssh_user + "\\Documents\\"
+
+            # Prepare and send the command to compress the user's "Documents" folder
+            compress_cmd = "powershell Compress-Archive " + filepath + ' ' + filepath + archive_name + ".zip"
+            stdin, stdout, stderr = ssh_client.exec_command(compress_cmd)
+
+        # For all other OS
+        else:
+            # Initiating the filepath variable
+            filepath = "~/"
+
+            # Prepare and send the command to compress the user's home directory
+            compress_cmd = "tar -zcvf " + filepath + archive_name + ".tar.gz" + ' ' + filepath
+            stdin, stdout, stderr = ssh_client.exec_command(compress_cmd)
+
+        # Waiting on the compress command to be over and checking its result
+        exit_compress = stdout.channel.recv_exit_status()
+        if exit_compress != 0:
+            print("Error while compressing the \"Documents\" folder", exit_compress)
+        else:
+            print("hi")
+
+    # Except block in case the SSH isn't responding
+    except paramiko.ssh_exception.NoValidConnectionsError as error:
+        print(error)
+        pass
+    # Except block on authentication issues (wrong user and/or password)
+    except paramiko.ssh_exception.AuthenticationException as error:
+        print(error)
+        pass
 
 
-# Function mainmenu - using netscan's output, display the list of available nodes and launch the backup
-def mainmenu():
+# Function main_menu - using net_scan's output, display the list of available nodes and launch the backup
+def main_menu():
     # Using the network scan result, printing the selection menu
     # Loop condition
     keep_showing = True
@@ -103,7 +165,7 @@ def mainmenu():
                 user_answer = input("Given IP address not available, please refer to the table or enter 'x' to exit): ")
 
         # Start the backup function
-        remotebackup(user_answer)
+        remote_backup(user_answer)
 
 
 # Main program
@@ -111,8 +173,8 @@ def mainmenu():
 os_platform = platform.system()
 online_nodes = {}
 
-# Invoke netscan function
-netscan()
+# Invoke net_scan function
+net_scan()
 
-# Invoke nodeselection fuction
-mainmenu()
+# Invoke main_menu function
+main_menu()
