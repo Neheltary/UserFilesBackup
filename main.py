@@ -14,12 +14,13 @@ import os
 # Function netscan declaration - list all available nodes within a user given IP range
 def netscan():
     # Obtaining the network IP which will be checked
-    input_ip = input("Enter the network IP you wish to check (/24 expected): ")
+    input_ip = input("Enter the network IP you wish to check: ")
+    start_ip = input("Enter the starting digit to check for this network: ")
+    last_ip = input("Enter the last digit to check for this network: ")
 
     # Reformatting the network for easier use
     ip_split = input_ip.split('.')
     ips_to_scan = ip_split[0] + '.' + ip_split[1] + '.' + ip_split[2] + '.'
-    last_member = int(ip_split[3]) + 1
 
     # Initiating the ping command depending on the system from which the script is launched
     if os_platform == "Windows":
@@ -28,11 +29,11 @@ def netscan():
         os_ping = "ping -c 1 -w 150 "
 
     # Lets get those online nodes & store them in the dictionary !
-    for loop_control in range(1, 254):
+    for last_member in range(start_ip, last_ip):
         # Setting the ping command
         current_ip = ips_to_scan + str(last_member)
         current_check = os_ping + current_ip
-
+        print("I'm pinging {}".format(current_ip))
         # Storing the ping result
         result = subprocess.Popen(current_check, shell=True, stdout=subprocess.PIPE).communicate()[0]
         # Ensuring the result content will always be the same no matter what OS is running the script
@@ -48,17 +49,8 @@ def netscan():
             except socket.herror:
                 host_name = ("Hostname unavailable",)
 
-            # Adding this node to the dictionary
+            # Adding this online node to the dictionary
             online_nodes.update({host_name[0]: current_ip})
-
-        # Preparing the next iteration
-        last_member += 1
-
-        # Control on the IP: ensure we're not trying to check xxx.xxx.xxx.256 and above
-        if last_member == 256:
-            ip_split[2] = str(int(ip_split[2]) + 1)
-            last_member = 0
-            ips_to_scan = ip_split[0] + '.' + ip_split[1] + '.' + ip_split[2] + '.'
 
     # Ensuring we've got some nodes online before launching the menu
     if bool(online_nodes) is False:
@@ -69,7 +61,7 @@ def netscan():
 
 # Function remotebackup declaration - connect to the node, zip f
 def remotebackup(ip_to_backup):
-    print("Ici, je dois implémenter la fonction de sauvegarde pour {}".format(ip_to_backup))
+    # print("Ici, je dois implémenter la fonction de sauvegarde pour {}".format(ip_to_backup))
     # Unix node ?
     # Use tar cmd
     # Windows node ?
