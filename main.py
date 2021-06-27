@@ -1,6 +1,6 @@
 # UserFilesBackup allows you to backup the users' files from remote nodes
 # Tested on Linux (Debian == homedir) and Microsoft OS (Windows 10 == "Documents" folder)
-# Version 0.1
+# Version 1.0
 
 # Modules required
 import platform
@@ -33,7 +33,7 @@ def net_scan():
         # Setting the ping command
         current_ip = ips_to_scan + str(last_member)
         current_check = os_ping + current_ip
-        print("I'm pinging {}".format(current_ip))
+
         # Storing the ping result
         result = subprocess.Popen(current_check, shell=True, stdout=subprocess.PIPE).communicate()[0]
         # Ensuring the result content will always be the same no matter what OS is running the script
@@ -93,32 +93,63 @@ def remote_backup(ip_to_backup):
         out = stdout.read().decode().strip()
 
         # Formatting the archive's name
-        archive_name = time.strftime("%Y%m%d-%H:%M:%S") + '-' + ip_to_backup + '-' + ssh_user
+        archive_name = time.strftime("%Y%m%d@%Hh%Mm%Ss") + '-' + ip_to_backup + '-' + ssh_user
 
         # Target is a Windows node
         if 'Windows' in out:
-            # Initiating the filepath variable
+            # Initiating the variables for a Windows node
+            delete_cmd = "del "
             filepath = "C:\\Users\\" + ssh_user + "\\Documents\\"
+            archive_with_ext = archive_name + ".zip"
 
             # Prepare and send the command to compress the user's "Documents" folder
-            compress_cmd = "powershell Compress-Archive " + filepath + ' ' + filepath + archive_name + ".zip"
+            compress_cmd = "powershell Compress-Archive " + filepath + ' ' + filepath + archive_with_ext
             stdin, stdout, stderr = ssh_client.exec_command(compress_cmd)
 
         # For all other OS
         else:
-            # Initiating the filepath variable
-            filepath = "~/"
+            # Initiating the variables for other OSes
+            delete_cmd = "rm "
+            filepath = "/home/" + ssh_user + "/"
+            archive_with_ext = archive_name + ".tar.gz"
 
             # Prepare and send the command to compress the user's home directory
-            compress_cmd = "tar -zcvf " + filepath + archive_name + ".tar.gz" + ' ' + filepath
+            compress_cmd = "tar -zcvf " + filepath + archive_with_ext + ' ' + filepath
             stdin, stdout, stderr = ssh_client.exec_command(compress_cmd)
 
         # Waiting on the compress command to be over and checking its result
         exit_compress = stdout.channel.recv_exit_status()
         if exit_compress != 0:
-            print("Error while compressing the \"Documents\" folder", exit_compress)
+            print("Error while compressing the user's folder", exit_compress)
         else:
-            print("hi")
+            # Initiating a file transfer method (sftp) through the Paramiko ssh's instance
+            file_transfer = ssh_client.open_sftp()
+
+            # Generating the local backup folder depending on the OS
+            if os_platform == "Windows":
+                local_path = "C:\\Backup\\"
+            else:
+                local_path = "/home/" + os.getlogin() + "/backup/"
+
+            # Making sure this folder exists, if not create it
+            if not os.path.exists(local_path):
+                os.makedirs(local_path)
+
+            # Importing the archive from the distant node
+            file_transfer.get(filepath + archive_with_ext, local_path + archive_with_ext)
+
+            print()
+            print("Archive successfully retrieved and stored at: {}".format(local_path + archive_with_ext))
+
+            # Cleaning the archive from the distant node
+            stdin, stdout, stderr = ssh_client.exec_command(delete_cmd+ filepath + archive_with_ext)
+            print("Cleanup on remote node: {} deleted".format(delete_cmd+ filepath + archive_with_ext))
+
+            # Cleaning the existing connections
+            if file_transfer:
+                file_transfer.close()
+            if ssh_client:
+                ssh_client.close()
 
     # Except block in case the SSH isn't responding
     except paramiko.ssh_exception.NoValidConnectionsError as error:
@@ -145,6 +176,7 @@ def main_menu():
     # >> if a 'known' IP is entered ==> launch the backup function and back to the menu
     # >> if an 'unknown' IP is entered ==> the program loops on showing the menu
     while keep_showing:
+        print()
         print(top)
         print("{: ^1}{: ^30}{: ^1}{: ^17}{: ^1}".format("|", "Hostname", "|", "IP", "|"))
         print(top)
