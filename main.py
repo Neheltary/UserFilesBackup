@@ -24,9 +24,9 @@ def net_scan():
 
     # Initiating the ping command depending on the system from which the script is launched
     if os_platform == "Windows":
-        os_ping = "ping -n 1 -w 150 "
+        os_ping = "ping -n 1 -w 250 "
     else:
-        os_ping = "ping -c 1 -w 150 "
+        os_ping = "ping -c 1 -w 250 "
 
     # Lets get those online nodes & store them in the dictionary !
     for last_member in range(int(start_ip), int(last_ip)+1):
@@ -93,7 +93,7 @@ def remote_backup(ip_to_backup):
         out = stdout.read().decode().strip()
 
         # Formatting the archive's name
-        archive_name = time.strftime("%Y%m%d") + '-' + ip_to_backup + '-' + ssh_user
+        archive_name = time.strftime("%Y%m%d-%H:%M:%S") + '-' + ip_to_backup + '-' + ssh_user
 
         # Target is a Windows node
         if 'Windows' in out:
