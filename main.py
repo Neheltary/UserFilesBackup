@@ -142,8 +142,8 @@ def remote_backup(ip_to_backup):
             print("Archive successfully retrieved and stored at: {}".format(local_path + archive_with_ext))
 
             # Cleaning the archive from the distant node
-            stdin, stdout, stderr = ssh_client.exec_command(delete_cmd + filepath + archive_with_ext)
-            print("Cleanup on remote node: {} deleted".format(delete_cmd + filepath + archive_with_ext))
+            stdin, stdout, stderr = ssh_client.exec_command(delete_cmd+ filepath + archive_with_ext)
+            print("Cleanup on remote node: {} deleted".format(delete_cmd+ filepath + archive_with_ext))
 
             # Cleaning the existing connections
             if file_transfer:
