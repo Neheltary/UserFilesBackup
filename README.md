@@ -17,6 +17,7 @@ v1.0: a network scan is done in order to prompt the user about choosing a node t
 **Security:**
 - Hide the password inputs --> getpass module
 - Ensure that the user's inputs are respecting the required format 
+- Encrypt the saved data
 
 **User experience & removing the network scan requirement:**
 - Input an IP to backup directly from command line
