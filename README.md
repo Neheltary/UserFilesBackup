@@ -14,13 +14,15 @@ Tested from Debian 11 to Debian 11 / Windows 10
 v1.0: a network scan is done in order to prompt the user about choosing a node to backup
 
 # TO DO
-Security: 
+**Security: **
 - Hide the password inputs --> getpass module
 - Ensure that the user's inputs are respecting the required format 
-User experience & removing the network scan requirement:
+
+**User experience & removing the network scan requirement:**
 - Input an IP to backup directly from command line
 - Propose to input an IP to backup from the menu before the network scan & user prompt
-Performance:
+
+**Performance:**
 - Decrease the network scan's time by multithreading it (or use an existing module: scapy ?)
 
 # How to use
