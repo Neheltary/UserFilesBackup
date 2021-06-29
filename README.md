@@ -8,17 +8,13 @@ This tool is saving user files as specified below:
 - Windows nodes - "Documents" folder
 - Unix nodes - homedir
 
-Tested from Debian 11 to Debian 11 / Windows 10
-And from Windows 10 to Debian 11 / Windows 10
-
+Tested from Debian 11 to Debian 11 / Windows 10 & from Windows 10 to Debian 11 / Windows 10
 
 # Version history
 v1.0: a network scan is done in order to prompt the user about choosing a node to backup
 
-
 # TO DO
-
-**Security: **
+**Security:**
 - Hide the password inputs --> getpass module
 - Ensure that the user's inputs are respecting the required format 
 
@@ -29,9 +25,7 @@ v1.0: a network scan is done in order to prompt the user about choosing a node t
 **Performance:**
 - Decrease the network scan's time by multithreading it (or use an existing module: scapy ?)
 
-
 # How to use
-
 **Requirements:**
 - **Paramiko** has to be installed on the node running the script
   ```
